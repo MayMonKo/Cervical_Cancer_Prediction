@@ -1,15 +1,17 @@
+# Node
+node_modules/
+dist/
+
+# Environment variables
+.env
+.env.*
+
 # Python
 __pycache__/
 *.pyc
-.venv/
-venv/
-
-# Jupyter
-.ipynb_checkpoints/
 
 # OS
 .DS_Store
-Thumbs.db
 
-# Optional: keep large raw data out of repo if needed
-*.csv
+# ML artifacts (already deployed on Render)
+backend/model_store/

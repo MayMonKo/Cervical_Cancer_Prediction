@@ -1,0 +1,173 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, #f6f9fc, #c3deff);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 780px;
+  background: white;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+
+  /* 🔒 Force readable text */
+  color: #1f2937; /* dark gray, safe on white */
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin: 0 0 18px;
+  color: #444;
+  line-height: 1.4;
+}
+
+.section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
+}
+
+.sectionTitle {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.smallNote {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  min-width: 320px;
+}
+
+.hint {
+  color: #555;
+  font-size: 14px;
+}
+
+.questions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.question {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  background: #fff;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.question.checked {
+  border-color: #8ab4ff;
+  background: #f5f9ff;
+}
+
+.question input {
+  margin-top: 4px;
+}
+
+.questionText {
+  line-height: 1.35;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.primary {
+  background: #1f6feb;
+  color: white;
+}
+
+.btn.secondary {
+  background: #e9ecef;
+  color: #222;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+
+.alert.ok {
+  background: #f8fcff;
+  border: 1px solid #b7c0f5;
+}
+
+.alert.warn {
+  background: #fff6e8;
+  border: 1px solid #ffd7a0;
+}
+
+.alert.error {
+  background: #ffecec;
+  border: 1px solid #ffb3b3;
+}
+
+.resultLine {
+  margin-bottom: 6px;
+}
+
+.footer {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  color: #444;
+}
+
+.checkboxWrap {
+  padding-top: 2px;
+}
+
+.textWrap {
+  flex: 1;
+}
+
+.questionText {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #222;
+}
