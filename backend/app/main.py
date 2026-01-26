@@ -14,6 +14,16 @@ from pydantic import BaseModel
 # joblib is used to load trained ML models
 import joblib
 
+from fastapi.middleware.cors import CORSMiddleware
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from fastapi.responses import JSONResponse
+from fastapi import Request
+
+limiter = Limiter(key_func=get_remote_address)
 
 # ================================
 # CREATE FASTAPI APPLICATION
@@ -26,7 +36,19 @@ app = FastAPI(
     description="Predict cervical cancer risk using SVM and Decision Tree models",
     version="1.0"
 )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",                 # local development
+        "https://cervical-cancer-prediction.vercel.app",  # production frontend
+    ],
+    allow_credentials=True,
+    allow_methods=["POST"],   # only what you need
+    allow_headers=["*"],
+)
 
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
 
 # ================================
 # ENABLE CORS (SECURITY + FRONTEND ACCESS)
@@ -149,3 +171,10 @@ def predict_dt(request: PredictRequest):
         "model": "Decision Tree",
         "prediction": int(prediction)
     }
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please try again later."}
+    )
