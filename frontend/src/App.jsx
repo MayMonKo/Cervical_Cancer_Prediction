@@ -22,7 +22,7 @@ import "./App.css";
  */
 
 // ✅ 1) PUT YOUR RENDER URL HERE (no trailing slash)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = "https://cervical-cancer-prediction-5ezz.onrender.com";
 
 /**
  * These are the EXACT feature keys your backend requires.
