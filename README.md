@@ -63,4 +63,9 @@ The complete system architecture is illustrated below.
 
 
 ## Repository Structure
-
+cervical-cancer-app/
+├── backend/ # FastAPI backend + ML inference
+├── frontend/ # React frontend application
+├── notebooks/ # Model training & experimentation
+├── CC_SA.jpg # System architecture diagram
+└── README.md
