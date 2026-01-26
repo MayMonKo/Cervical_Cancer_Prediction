@@ -2,7 +2,7 @@
 
 This project is a full-stack web-based machine learning application designed to estimate cervical cancer risk based on selected medical test indicators. The system integrates a modern frontend, a secure backend API, and pre-trained machine learning models to deliver real-time predictions through a browser interface.
 
-⚠️ Disclaimer: This system is for educational and research purposes only. It is not a medical diagnostic tool and does not replace professional medical advice.
+This system is for educational and research purposes only. It is not a medical diagnostic tool and does not replace professional medical advice.
 
 ---
 
