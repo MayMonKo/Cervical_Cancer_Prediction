@@ -1,6 +1,7 @@
 # Backend API — Cervical Cancer Prediction
 
 This backend service provides machine learning inference capabilities through a RESTful API. It is responsible for validating input data, enforcing security controls, and executing predictions using pre-trained models.
+The backend was deployed using Render Free tier.
 
 ---
 
