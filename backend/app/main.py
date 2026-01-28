@@ -2,65 +2,67 @@
 # IMPORT REQUIRED LIBRARIES
 # ================================
 
-# FastAPI is the framework that turns Python into a web API
-from fastapi import FastAPI, HTTPException
+# FastAPI: Web framework for building APIs
+from fastapi import FastAPI, HTTPException, Request
 
-# CORS middleware allows frontend (Vercel) to talk to backend (Render)
+# CORS: Allows frontend (Vercel) to communicate with backend (Render)
 from fastapi.middleware.cors import CORSMiddleware
 
-# Pydantic is used to validate incoming JSON data
+# Pydantic: Validates incoming JSON request bodies
 from pydantic import BaseModel
 
-# joblib is used to load trained ML models
+# joblib: Loads trained machine learning models and artifacts
 import joblib
 
-from fastapi.middleware.cors import CORSMiddleware
-
+# SlowAPI: Rate limiting to protect against abuse
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from fastapi.responses import JSONResponse
-from fastapi import Request
 
+# Used to return custom JSON error responses
+from fastapi.responses import JSONResponse
+
+
+# ================================
+# INITIALIZE RATE LIMITER
+# ================================
+
+# Uses client IP address as the rate-limit key
 limiter = Limiter(key_func=get_remote_address)
+
 
 # ================================
 # CREATE FASTAPI APPLICATION
 # ================================
 
-# This creates the API application
-# Once this runs, your backend becomes a web server
 app = FastAPI(
     title="Cervical Cancer Prediction API",
     description="Predict cervical cancer risk using SVM and Decision Tree models",
     version="1.0"
 )
+
+# Attach limiter to the app state
+app.state.limiter = limiter
+
+# Enable rate-limiting middleware
+app.add_middleware(SlowAPIMiddleware)
+
+
+# ================================
+# CONFIGURE CORS (SECURITY)
+# ================================
+
+# Only allow requests from known frontends
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",                 # local development
-        "https://cervical-cancer-prediction.vercel.app",  # production frontend
+        "http://localhost:5173",                         # Local development
+        "https://cervical-cancer-prediction.vercel.app"  # Production frontend
     ],
     allow_credentials=True,
-    allow_methods=["POST"],   # only what you need
+    allow_methods=["POST"],
     allow_headers=["*"],
-)
-
-app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
-
-# ================================
-# ENABLE CORS (SECURITY + FRONTEND ACCESS)
-# ================================
-
-# Without this, your React app (Vercel) CANNOT call this API
-# For FYP, allowing all origins is acceptable
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],      # Allow requests from any frontend
-    allow_methods=["*"],      # Allow GET, POST, etc.
-    allow_headers=["*"],      # Allow all headers
 )
 
 
@@ -68,25 +70,34 @@ app.add_middleware(
 # LOAD TRAINED MODEL ARTIFACTS
 # ================================
 
-# ---- Load SVM Model ----
-# These files were created in Task A2 from your notebook
+# ---- SVM artifacts ----
 svm_model = joblib.load("model_store/svm/model.pkl")
 svm_scaler = joblib.load("model_store/svm/scaler.pkl")
 svm_features = joblib.load("model_store/svm/features.pkl")
 
-# ---- Load Decision Tree Model ----
+# ---- Decision Tree artifacts ----
 dt_model = joblib.load("model_store/dt/model.pkl")
 dt_features = joblib.load("model_store/dt/features.pkl")
 
 
 # ================================
-# DEFINE INPUT DATA FORMAT
+# REQUEST BODY SCHEMA
 # ================================
 
-# This class defines how incoming JSON should look
-# FastAPI + Pydantic automatically validate this
 class PredictRequest(BaseModel):
-    data: dict   # Example: {"Age": 30, "Smokes": 0, ...}
+    """
+    Expected input format from frontend.
+
+    Example:
+    {
+        "data": {
+            "STDs": 0,
+            "Dx:Cancer": 0,
+            ...
+        }
+    }
+    """
+    data: dict
 
 
 # ================================
@@ -95,23 +106,36 @@ class PredictRequest(BaseModel):
 
 def build_feature_vector(input_data: dict, feature_list: list):
     """
-    This function:
-    1. Checks if any required feature is missing
-    2. Arranges values in the SAME ORDER used during training
+    Ensures:
+    1. All required features are present
+    2. Feature order matches training order exactly
+
+    This is critical for correct ML predictions.
     """
 
-    # Check for missing features
-    missing = [f for f in feature_list if f not in input_data]
+    # Identify missing features
+    missing_features = [f for f in feature_list if f not in input_data]
 
-    if missing:
-        # If features are missing, return HTTP error
+    if missing_features:
         raise HTTPException(
             status_code=400,
-            detail=f"Missing features: {missing}"
+            detail=f"Missing features: {missing_features}"
         )
 
-    # Return feature values in correct order
+    # Return features in correct order
     return [input_data[f] for f in feature_list]
+
+
+# ================================
+# GLOBAL ERROR HANDLER (RATE LIMIT)
+# ================================
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please try again later."}
+    )
 
 
 # ================================
@@ -121,7 +145,7 @@ def build_feature_vector(input_data: dict, feature_list: list):
 @app.get("/")
 def health_check():
     """
-    Simple endpoint to check if API is running
+    Simple endpoint used to verify that the API is running.
     """
     return {"status": "API is running successfully"}
 
@@ -131,18 +155,20 @@ def health_check():
 # ================================
 
 @app.post("/predict/svm")
-def predict_svm(request: PredictRequest):
+@limiter.limit("10/minute")
+def predict_svm(request: Request, payload: PredictRequest):
     """
-    Uses the trained SVM model to make predictions
+    Uses the trained Support Vector Machine (SVM) model
+    to predict cervical cancer risk.
     """
 
-    # Build feature vector in correct order
-    x = build_feature_vector(request.data, svm_features)
+    # Build ordered feature vector
+    x = build_feature_vector(payload.data, svm_features)
 
-    # Apply scaling (IMPORTANT for SVM)
+    # Apply scaling (required for SVM)
     x_scaled = svm_scaler.transform([x])
 
-    # Make prediction
+    # Perform prediction
     prediction = svm_model.predict(x_scaled)[0]
 
     return {
@@ -156,25 +182,20 @@ def predict_svm(request: PredictRequest):
 # ================================
 
 @app.post("/predict/dt")
-def predict_dt(request: PredictRequest):
+@limiter.limit("10/minute")
+def predict_dt(request: Request, payload: PredictRequest):
     """
-    Uses the trained Decision Tree model to make predictions
+    Uses the trained Decision Tree model
+    to predict cervical cancer risk.
     """
 
-    # Build feature vector in correct order
-    x = build_feature_vector(request.data, dt_features)
+    # Build ordered feature vector
+    x = build_feature_vector(payload.data, dt_features)
 
-    # Decision Tree does NOT require scaling
+    # Decision Trees do NOT require scaling
     prediction = dt_model.predict([x])[0]
 
     return {
         "model": "Decision Tree",
         "prediction": int(prediction)
     }
-
-@app.exception_handler(RateLimitExceeded)
-async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
-    return JSONResponse(
-        status_code=429,
-        content={"detail": "Too many requests. Please try again later."}
-    )

@@ -1,16 +1,67 @@
-# React + Vite
+# Frontend Web Application — Cervical Cancer Risk Check
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This frontend application provides a user-friendly interface for collecting medical indicators and displaying cervical cancer risk predictions in real time.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Responsibilities
 
-## React Compiler
+- Collect user input through an intuitive form
+- Validate user selections before submission
+- Communicate with the backend API securely
+- Display prediction results clearly and responsibly
+- Handle loading and error states gracefully
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Technologies Used
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- Vite
+- JavaScript (ES6+)
+- HTML5 / CSS3
+- Deployed on Vercel
+
+---
+
+## Application Flow
+
+1. User selects medical indicators via checkboxes
+2. Frontend constructs a JSON payload
+3. Payload is sent to the backend API over HTTPS
+4. Prediction result is received and displayed
+5. No user data is stored locally or remotely
+
+---
+
+## Environment Configuration
+
+The backend API URL is configured using environment variables:
+
+VITE_API_BASE_URL=https://<render-backend-url>
+
+
+This ensures:
+- No hardcoded secrets
+- Safe deployment across environments
+- Secure integration with cloud services
+
+---
+
+## UX & Design Principles
+
+- Clear medical disclaimers
+- Minimalistic and accessible layout
+- Visual feedback for selected inputs
+- Disabled actions during API requests
+- Responsive design for different screen sizes
+
+---
+
+## Interview Notes
+
+The frontend demonstrates:
+- Clean React component design
+- Secure API consumption
+- Real-world deployment practices
+- User-centric interface for sensitive data
